@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { Event } from "@tauri-apps/api/event";
   import { onMount } from "svelte";
-  import "../styles/xterm.css";
+  import "../../styles/xterm.css";
+
+  let isPrompt = false;
+  let capturedPrompt = "";
 
   onMount(async () => {
     let terminalNode = document.getElementById("terminal");
@@ -33,6 +36,16 @@
     const unlisten = await listen(
       "armageddon_output",
       (e: Event<Uint8Array>) => {
+        const payloadString = String.fromCharCode(...e.payload);
+        if (payloadString.includes("__begin_prompt")) {
+          isPrompt = true;
+          console.log("prompt begins caught: " + payloadString);
+        }
+        if (payloadString.includes("__end_prompt")) {
+          isPrompt = false;
+          console.log("prompt ends caught: " + payloadString);
+        }
+
         terminal.write(e.payload);
       }
     );

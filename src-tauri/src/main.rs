@@ -45,17 +45,11 @@ async fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            test,
             connect_to_armageddon,
             process_armageddon_input
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-#[tauri::command]
-fn test(input: &str) {
-    tracing::info!("Received command: {}", input);
 }
 
 #[tauri::command]
@@ -95,7 +89,7 @@ async fn process_armageddon_input(
     input: &str,
     state: tauri::State<'_, Mutex<State>>,
 ) -> Result<(), String> {
-    tracing::info!("armageddon input: {:?}", input);
+    tracing::debug!("armageddon input: {:?}", input);
 
     let mut state = state.lock().await;
 
@@ -113,7 +107,7 @@ async fn process_armageddon_input(
 }
 
 fn process_stream_output<R: tauri::Runtime>(message: Vec<u8>, manager: &impl tauri::Manager<R>) {
-    tracing::info!("armageddon output: {:?}", message);
+    tracing::debug!("armageddon output: {:?}", message);
     manager.emit_all("armageddon_output", message).unwrap();
 }
 
@@ -129,6 +123,6 @@ async fn process_stream(
         output_tx.send(received).await?;
     }
 
-    tracing::info!("process_stream received EOF");
+    tracing::debug!("process_stream received EOF");
     Ok(())
 }

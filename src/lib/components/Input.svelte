@@ -24,7 +24,6 @@
 
     if (target) {
       value = (target as HTMLTextAreaElement).value;
-      console.log("value is now: " + value);
     }
   }
 
@@ -54,6 +53,15 @@
 
   async function submitInput() {
     const { invoke } = await import("@tauri-apps/api");
+
+    if (value === "_prompt") {
+      const promptCommand =
+        "prompt __begin_prompt [%h] [%H] [%m] [%M] [%v] [%V] [%t] [%T] [%x] [%X] [%l] [%L] [%n] [%i] [%s] [%S] [%f] [%o] [%a] [%k] [%w] [%A] [%O] [%e] [%E] [%d] [%p] [%P] [%c] [%R] [%u] [%U] [%q] __end_prompt";
+
+      invoke("process_armageddon_input", { input: promptCommand });
+      selectValue();
+      return;
+    }
 
     invoke("process_armageddon_input", { input: value });
 
