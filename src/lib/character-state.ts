@@ -1,16 +1,16 @@
 import { writable, derived } from "svelte/store";
 import type { Writable } from "svelte/store";
 
-type Hunger = "starving" | "famished" | "very hungry" | "hungry" | "little hungry" | "peckish" | "satisfied" | "full"|"stuffed";
-type Thirst = "dehydrated" | "parched" | "very thirsty" | "thirsty" | "little thirsty" | "not thirsty";
+export type Hunger = "starving" | "famished" | "very hungry" | "hungry" | "little hungry" | "peckish" | "satisfied" | "full"|"stuffed";
+export type Thirst = "dehydrated" | "parched" | "very thirsty" | "thirsty" | "little thirsty" | "not thirsty";
 type Intoxication = "";
-type Day = "Ocandra" | "Terrin" | "Abid" | "Cingel" | "Nekrete" | "Waleuk" | "Yochem" | "Huegel" | "Dzeda" | "Barani" | "Detal";
-type Time = "before dawn" | "dawn" | "early morning" | "late morning" | "high sun" | "early afternoon" | "late afternoon" | "dusk" | "late at night";
-type Armed = "armed" | "unarmed";
-type Position = "standing" | "sitting" | "resting" | "sleeping";
-type Speed = "walking" | "running" | "sneaking";
-type Scan = "Scan" | "";
-type Listen = "Listen" | "";
+export type Day = "Ocandra" | "Terrin" | "Abid" | "Cingel" | "Nekrete" | "Waleuk" | "Yochem" | "Huegel" | "Dzeda" | "Barani" | "Detal";
+export type Time = "before dawn" | "dawn" | "early morning" | "late morning" | "high sun" | "early afternoon" | "late afternoon" | "dusk" | "late at night";
+export type Armed = "armed" | "unarmed";
+export type Position = "standing" | "sitting" | "resting" | "sleeping";
+export type Speed = "walking" | "running" | "sneaking";
+export type Scan = "Scan" | "";
+export type Listen = "Listen" | "";
 type Visibility = "Vis" | "Invis";
 type Flying = "flying" | "not flying";
 type Stance = "riposte" | "";
@@ -40,11 +40,14 @@ const scan: Writable<Scan | null> = writable(null);
 const listen: Writable<Listen | null> = writable(null);
 
 // Nonspecific string states
+const verbosePosition: Writable<string | null> = writable(null);
 const accent: Writable<string | null> = writable(null);
 const language: Writable<string | null> = writable(null);
 const mount: Writable<string | null> = writable(null);
+const mood: Writable<string | null> = writable(null);
 
 // Nonspecific string states to port to specific
+const encumbrance: Writable<string | null> = writable(null);
 const intoxication: Writable<string | null> = writable(null);
 const visibility: Writable<string | null> = writable(null);
 const flying: Writable<string | null> = writable(null);
@@ -71,9 +74,12 @@ export {
   speed,
   scan,
   listen,
+  verbosePosition,
   accent,
   language,
   mount,
+  mood,
+  encumbrance,
   intoxication,
   visibility,
   flying,

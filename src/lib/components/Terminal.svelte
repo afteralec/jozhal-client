@@ -1,6 +1,49 @@
 <script lang="ts">
   import type { Event } from "@tauri-apps/api/event";
   import { onMount } from "svelte";
+  import type {
+    Position,
+    Speed,
+    Armed,
+    Time,
+    Day,
+    Scan,
+    Listen,
+    Hunger,
+    Thirst
+  } from "../character-state";
+  import {
+    health,
+    maxHealth,
+    mana,
+    maxMana,
+    stamina,
+    maxStamina,
+    stun,
+    maxStun,
+    focus,
+    maxFocus,
+    visibility,
+    position,
+    verbosePosition,
+    flying,
+    language,
+    accent,
+    mount,
+    speed,
+    armed,
+    mood,
+    time,
+    encumbrance,
+    day,
+    scan,
+    listen,
+    stance,
+    intoxication,
+    hunger,
+    thirst,
+    combatQuit
+  } from "../character-state";
   import "../../styles/xterm.css";
 
   let isPrompt = false;
@@ -37,7 +80,6 @@
       "armageddon_output",
       (e: Event<Uint8Array>) => {
         processPrompt(e.payload);
-
         terminal.write(e.payload);
       }
     );
@@ -51,31 +93,33 @@
   });
 
   function processPrompt(bytes: Uint8Array) {
-    for (let i = 0; i < bytes.length; i++) {
-      if (bytes.includes(95)) {
-        if (payloadContainsBeginPrompt(bytes)) {
+    if (bytes.includes(95)) {
+      if (payloadContainsBeginPrompt(bytes)) {
+        const payloadString = String.fromCharCode(...bytes);
+        const promptMatter = payloadString.split("__begin_prompt");
+        capturedPrompt += promptMatter[1].replace("__end_prompt", "");
+        isPrompt = true;
+
+        if (payloadContainsEndPrompt(bytes)) {
+          processPromptData();
+          isPrompt = false;
+          return;
+        }
+      } else if (isPrompt) {
+        if (payloadContainsEndPrompt(bytes)) {
           const payloadString = String.fromCharCode(...bytes);
           const promptMatter = payloadString.split("__begin_prompt");
-          console.log("caught begin prompt: " + promptMatter);
-          isPrompt = true;
-
-          if (payloadContainsEndPrompt(bytes)) {
-            console.log("caught end of prompt in same payload as begin prompt");
-            isPrompt = false;
-            return;
-          }
-        } else if (isPrompt) {
-          if (payloadContainsEndPrompt(bytes)) {
-            const payloadString = String.fromCharCode(...bytes);
-            const promptMatter = payloadString.split("__begin_prompt");
-            console.log("caught end prompt: " + promptMatter);
-            isPrompt = false;
-            return;
-          } else {
-            const payloadString = String.fromCharCode(...bytes);
-            const promptMatter = payloadString.split("__begin_prompt");
-            console.log("middle prompt matter: " + promptMatter);
-          }
+          // promptMatter[0] here should be the prompt data
+          capturedPrompt += promptMatter[0].replace("__end_prompt", "");
+          processPromptData();
+          // on this assign we're closing the prompt and can process the data
+          isPrompt = false;
+          return;
+        } else {
+          // @TODO: Handle this corner case
+          const payloadString = String.fromCharCode(...bytes);
+          const promptMatter = payloadString.split("__begin_prompt");
+          return;
         }
       }
     }
@@ -145,6 +189,48 @@
     }
 
     return true;
+  }
+
+  function processPromptData() {
+    const promptItems = capturedPrompt
+      .replace(/\[/g, "")
+      .replace(/\]/g, "")
+      .split(" ");
+    capturedPrompt = "";
+
+    health.set(Number(promptItems[0]));
+    maxHealth.set(Number(promptItems[1]));
+    mana.set(Number(promptItems[2]));
+    maxMana.set(Number(promptItems[3]));
+    stamina.set(Number(promptItems[4]));
+    maxStamina.set(Number(promptItems[5]));
+    stun.set(Number(promptItems[6]));
+    maxStun.set(Number(promptItems[7]));
+    focus.set(Number(promptItems[8]));
+    maxFocus.set(Number(promptItems[9]));
+    // longDescriptionStatus: result[11],
+    // longDescription: result[12],
+    // name: result[13],
+    visibility.set(promptItems[14]);
+    position.set(promptItems[15] as Position);
+    verbosePosition.set(promptItems[16]);
+    flying.set(promptItems[17]);
+    language.set(promptItems[18]);
+    accent.set(promptItems[19]);
+    mount.set(promptItems[20]);
+    speed.set(promptItems[21] as Speed);
+    armed.set(promptItems[22] as Armed);
+    mood.set(promptItems[23]);
+    time.set(promptItems[24] as Time);
+    encumbrance.set(promptItems[25]);
+    day.set(promptItems[26] as Day);
+    scan.set(promptItems[27] as Scan);
+    listen.set(promptItems[28] as Listen);
+    stance.set(promptItems[29]);
+    intoxication.set(promptItems[30]);
+    hunger.set(promptItems[31] as Hunger);
+    thirst.set(promptItems[32] as Thirst);
+    combatQuit.set(promptItems[33]);
   }
 </script>
 
