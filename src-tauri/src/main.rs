@@ -121,14 +121,12 @@ async fn process_stream(
     mut stream_reader: BufReader<OwnedReadHalf>,
     output_tx: mpsc::Sender<Vec<u8>>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let mut buf = Vec::new();
-    while let Ok(bytes_read) = stream_reader.read_until(b'\n', &mut buf).await {
-        if bytes_read == 0 {
-            break;
-        };
-        output_tx.send(buf.clone()).await?;
-        tracing::info!("Sending output: {:?}", String::from_utf8_lossy(&buf));
-        buf.clear();
+    // Read current current data in the TcpStream
+    while let Ok(received) = stream_reader.fill_buf().await {
+        let received = received.to_vec();
+
+        stream_reader.consume(received.len());
+        output_tx.send(received).await?;
     }
 
     tracing::info!("process_stream received EOF");
